@@ -17,6 +17,28 @@
 #include "Util/ImageLoadingUtil.h"
 #include "Reflection/ClassGenerator.h"
 
+// EJson is not UENUM so can't use UEnum::GetValueAsString() :(
+static const TCHAR* EJsonToDebugString(const EJson Type) {
+	using enum EJson;
+	switch (Type) {
+	case None:
+		return TEXT("None");
+	case Null:
+		return TEXT("Null");
+	case String:
+		return TEXT("String");
+	case Number:
+		return TEXT("Number");
+	case Boolean:
+		return TEXT("Boolean");
+	case Array:
+		return TEXT("Array");
+	case Object:
+		return TEXT("Object");
+	default:
+		return TEXT("Unknown");
+	}
+}
 
 TArray<FString> UBPFContentLib::GetBlueprintFunctionNames(UClass* BlueprintClass) {
 	TArray<FString> Names;
@@ -169,9 +191,10 @@ void UBPFContentLib::SetBooleanFieldWithLog(bool& Field, const FString FieldName
 		return;
 	}
 
-	if (Result->TryGetField(FieldName)->Type != EJson::Boolean) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Boolean"), *FieldName)
-			return;
+	auto type = Result->TryGetField(FieldName)->Type;
+	if (type != EJson::Boolean) {
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Boolean, was %s"), *FieldName, *EJsonToDebugString(type));
+		return;
 	}
 
 	Field = Result->TryGetField(FieldName)->AsBool();
@@ -182,8 +205,9 @@ void UBPFContentLib::SetFloatFieldWithLog(float& Field, const FString FieldName,
 		return;
 	}
 
-	if (Result->TryGetField(FieldName)->Type != EJson::Number) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Number"), *FieldName);
+	auto type = Result->TryGetField(FieldName)->Type;
+	if (type != EJson::Number) {
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Number, was %s"), *FieldName, *EJsonToDebugString(type));
 		return;
 	}
 
@@ -195,17 +219,14 @@ void UBPFContentLib::SetIntegerFieldWithLog(int32& Field, const FString FieldNam
 		return;
 	}
 
-	if (Result->TryGetField(FieldName)->Type != EJson::Number && Result->TryGetField(FieldName)->Type != EJson::Boolean) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Number or Boolean"), *FieldName);
-		return;
-	}
-
-	if (Result->TryGetField(FieldName)->Type == EJson::Boolean) {
+	auto type = Result->TryGetField(FieldName)->Type;
+	if (type == EJson::Number) {
+		Field = Result->TryGetField(FieldName)->AsNumber();
+	} else if (type == EJson::Boolean) {
 		Field = static_cast<int32>(Result->TryGetField(FieldName)->AsBool());
-		return;
+	} else {
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Number or Boolean, was %s"), *FieldName, *EJsonToDebugString(type));
 	}
-
-	Field = Result->TryGetField(FieldName)->AsNumber();
 }
 
 void UBPFContentLib::SetSmallIntegerFieldWithLog(uint8& Field, const FString FieldName, TSharedPtr<FJsonObject> Result) {
@@ -213,17 +234,14 @@ void UBPFContentLib::SetSmallIntegerFieldWithLog(uint8& Field, const FString Fie
 		return;
 	}
 
-	if (Result->TryGetField(FieldName)->Type != EJson::Number && Result->TryGetField(FieldName)->Type != EJson::Boolean) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Number or Boolean"), *FieldName);
-		return;
-	}
-
-	if (Result->TryGetField(FieldName)->Type == EJson::Boolean) {
+	auto type = Result->TryGetField(FieldName)->Type;
+	if (type == EJson::Number) {
+		Field = Result->TryGetField(FieldName)->AsNumber();
+	} else if (type == EJson::Boolean) {
 		Field = static_cast<uint8>(Result->TryGetField(FieldName)->AsBool());
-		return;
+	} else {
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Number or Boolean, was %s"), *FieldName, *EJsonToDebugString(type));
 	}
-
-	Field = Result->TryGetField(FieldName)->AsNumber();
 }
 
 void UBPFContentLib::SetStringFieldWithLog(FString& Field, const FString FieldName, TSharedPtr<FJsonObject> Result) {
@@ -231,8 +249,9 @@ void UBPFContentLib::SetStringFieldWithLog(FString& Field, const FString FieldNa
 		return;
 	}
 
-	if (Result->TryGetField(FieldName)->Type != EJson::String) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type String"), *FieldName);
+	auto type = Result->TryGetField(FieldName)->Type;
+	if (type != EJson::String) {
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type String, was %s"), *FieldName, *EJsonToDebugString(type));
 		return;
 	}
 
@@ -244,8 +263,9 @@ bool UBPFContentLib::SetStringArrayFieldWithLog(TArray<FString>& Field, FString 
 		return false;
 	}
 
-	if (Result->TryGetField(FieldName)->Type != EJson::Array) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Array"), *FieldName);
+	auto type = Result->TryGetField(FieldName)->Type;
+	if (type != EJson::Array) {
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of Type Array, was %s"), *FieldName, *EJsonToDebugString(type));
 		return false;
 	}
 	for (const auto& i : Result->TryGetField(FieldName)->AsArray()) {
@@ -258,7 +278,7 @@ bool UBPFContentLib::SetStringArrayFieldWithLog(TArray<FString>& Field, FString 
 			}
 		}
 		else {
-			UE_LOG(LogContentLib, Error, TEXT("Field %s contains Elements that aren't Strings"), *FieldName)
+			UE_LOG(LogContentLib, Error, TEXT("Field %s contains Element that isn't a String, was %s, so skipping it"), *FieldName, *EJsonToDebugString(i->Type));
 		}
 	}
 	return true;
@@ -271,7 +291,7 @@ bool UBPFContentLib::SetScannableResourcesArrayFieldWithLog(TArray<FContentLib_U
 
 	auto pendingResourcesToAdd = Result->TryGetField(FieldName);
 	if (pendingResourcesToAdd->Type != EJson::Array) {
-		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of type Array"), *FieldName);
+		UE_LOG(LogContentLib, Error, TEXT("Field %s is not of type Array, was %s"), *FieldName, *EJsonToDebugString(pendingResourcesToAdd->Type));
 		return false;
 	}
 

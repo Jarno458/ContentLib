@@ -11,6 +11,7 @@
 #include "FGSchematic.h"
 #include "ItemAmount.h"
 #include "Dom/JsonObject.h"
+#include "Serialization/JsonTypes.h"
 #include "Serialization/ObjectWriter.h"
 #include "Serialization/ObjectReader.h"
 #include "Kismet/BlueprintAssetHelperLibrary.h"
