@@ -23,6 +23,7 @@ To get an idea of what ContentLib is capable of, check out a few existing mods t
 
 <!-- cspell:disable -->
 - [RePan - Oil](https://ficsit.app/mod/RePan_Petroleum) by McGalleon
+- [FICSIT Expert Expansion - FexPan](https://ficsit.app/mod/FexPan) by McGalleon
 - [Recipe Maker](https://ficsit.app/mod/RecipeMaker), [Auto Packing](https://ficsit.app/mod/AutoPacking), [Building Kits](https://ficsit.app/mod/BuildingKits), [Hide Researched Milestones](https://ficsit.app/mod/HideSchematic), [Recipe Randomizer](https://ficsit.app/mod/RecipeRandomizer), and more by Andre Aquilla
 - [ContentInfo](https://ficsit.app/mod/ContentInfo) by Nog
 - [Useful Liquid Biofuel](https://ficsit.app/mod/UsefulLiquidBiofuel) by Jarno458
@@ -172,4 +173,5 @@ Check out the [docs](https://docs.ficsit.app/contentlib/latest/index.html) to ge
 
 ## Credits
 
-Icons by deantendo#4265
+- Mod icon by deantendo#4265
+- Community contributors can be viewed [on the GitHub](https://github.com/Nogg-aholic/ContentLib/graphs/contributors)
