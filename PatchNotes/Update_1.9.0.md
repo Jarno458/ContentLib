@@ -1,4 +1,4 @@
-Added the ability to modify item AWESOME Sink points and unlock Resource Scanning from schematics. (Thanks Mirrym, BlueBeka, and Th3Fanbus!)
+Added the ability to modify item AWESOME Sink points and unlock Resource Scanning from schematics. (Thanks Miirym, BlueBeka, and Th3Fanbus!)
 
 
 
